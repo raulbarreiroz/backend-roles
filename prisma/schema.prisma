@@ -1,0 +1,49 @@
+// Esquema de la biblioteca — SQLite para poder correr sin Docker
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  nombre       String?
+  creadoEn     DateTime @default(now())
+}
+
+model Autor {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  pais      String?
+  biografia String?
+  libros    Libro[]
+  creadoEn  DateTime @default(now())
+}
+
+model Libro {
+  id           Int         @id @default(autoincrement())
+  titulo       String
+  isbn         String?     @unique
+  anio         Int?
+  disponibles  Int         @default(1)
+  autorId      Int
+  autor        Autor       @relation(fields: [autorId], references: [id], onDelete: Cascade)
+  prestamos    Prestamo[]
+  creadoEn     DateTime    @default(now())
+}
+
+model Prestamo {
+  id              Int       @id @default(autoincrement())
+  libroId         Int
+  libro           Libro     @relation(fields: [libroId], references: [id])
+  lectorNombre    String
+  lectorEmail     String
+  fechaPrestamo   DateTime  @default(now())
+  fechaDevolucion DateTime?
+  estado          String    @default("activo") // activo | devuelto
+}
